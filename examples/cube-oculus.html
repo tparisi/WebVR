@@ -5,12 +5,13 @@
       <style>
 
 			.button {
-				position: fixed;
+				position: absolute;
 				bottom: 20px;
 				right: 20px;
 				padding: 8px;
 				color: #FFF;
 				background-color: #555;
+				z-index:1;
 			}
       </style>
 
@@ -19,22 +20,45 @@
 <body>
 
 	<div class="button">Start VR Mode</div>
-    <div id="container" style="width:100%;height:100%;"></div>
+    <div id="container" style="position:absolute;left:0;top:0;width:100%;height:100%;"></div>
 
 </body>
 
 <script src="../libs/jquery-1.9.1/jquery-1.9.1.js"></script>
 <script src="../libs/three.js.r68/three.js"></script>
 <script src="../libs/three.js.r68/effects/VREffect.js"></script>
+<script src="../libs/three.js.r68/controls/VRControls.js"></script>
 <script src="../libs/requestAnimationFrame/RequestAnimationFrame.js"></script>
 <script type="text/javascript">
 
 	var container = null,
 	renderer = null, 
 	effect = null,
+	controls = null,
 	scene = null, 
 	camera = null,
 	cube = null;
+
+
+	$(document).ready(
+			function() {
+
+				// Set up Three.js
+				initThreeJS();
+				
+				// Set up VR rendering
+				initVREffect();
+
+				// Create the scene content
+				initScene();
+
+				// Set up VR camera controls
+				initVRControls();
+
+		        // Run the run loop
+		        run();
+			}
+	);
 	
     var duration = 10000; // ms
     var currentTime = Date.now();
@@ -54,6 +78,9 @@
 			// Render the scene
 			effect.render( scene, camera );
 
+			// Update the VR camera controls
+			controls.update();
+
 			// Spin the cube for next frame
 			animate();
 				
@@ -65,15 +92,18 @@
 
         // Create the Three.js renderer and attach it to our canvas
 	    renderer = new THREE.WebGLRenderer( { antialias: true } );
-	    container.appendChild(renderer.domElement);
 
 	    // Set the viewport size
 	    renderer.setSize(window.innerWidth, window.innerHeight);
+	    container.appendChild(renderer.domElement);
 
+		window.addEventListener( 'resize', function(event) { 
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		}, false );
 
     }
 
-    function initVR() {
+    function initVREffect() {
 
 	    // Set up Oculus renderer
 	    effect = new THREE.VREffect(renderer, function(err) {
@@ -95,6 +125,15 @@
 			}
 		};
 
+		// Set up VR camera controls
+		controls = new THREE.VRControls(camera, function(err) {
+	    	if (err) {
+	    		console.log("Error creating VRControls: ", err);			    		
+	    	}
+	    	else {
+	    		console.log("Created VRControls: ", controls);			    		
+	    	}
+	    });
     }
 
     function initScene() {
@@ -102,7 +141,7 @@
 		    scene = new THREE.Scene();
 
 		    // Add  a camera so we can view the scene
-	        camera = new THREE.PerspectiveCamera( 45, container.offsetWidth / container.offsetHeight, 1, 4000 );
+	        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 4000 );
 			scene.add(camera);
 			
 	        // Create a texture-mapped cube and add it to the scene
@@ -120,7 +159,7 @@
 	        cube = new THREE.Mesh(geometry, material);
 
 	        // Move the mesh back from the camera and tilt it toward the viewer
-	        cube.position.z = -4;
+	        cube.position.z = -6;
 	        cube.rotation.x = Math.PI / 5;
 	        cube.rotation.y = Math.PI / 5;
 
@@ -129,22 +168,19 @@
 
     }
 
-	$(document).ready(
-			function() {
+    function initVRControls() {
 
-				// Set up Three.js
-				initThreeJS();
-				
-				// Set up VR rendering and camera controls
-				initVR();
-
-				// Create the scene content
-				initScene();
-
-		        // Run the run loop
-		        run();
-			}
-	);
+		// Set up VR camera controls
+		controls = new THREE.VRControls(camera, function(err) {
+	    	if (err) {
+	    		console.log("Error creating VRControls: ", err);			    		
+	    	}
+	    	else {
+	    		console.log("Created VRControls: ", controls);
+	    		controls.zeroSensor();			    		
+	    	}
+	    });
+    }
 
 </script>
 
