@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>WebVR &mdash; Oculus Rift Three.js Cube</title>
+<title>WebVR &mdash; Cardboard VR Three.js Cube</title>
       <style>
 
 			.button {
@@ -26,8 +26,8 @@
 
 <script src="../libs/jquery-1.9.1/jquery-1.9.1.js"></script>
 <script src="../libs/three.js.r68/three.js"></script>
-<script src="../libs/three.js.r68/effects/VREffect.js"></script>
-<script src="../libs/three.js.r68/controls/VRControls.js"></script>
+<script src="../libs/three.js.r68/effects/StereoEffect.js"></script>
+<script src="../libs/three.js.r68/controls/DeviceOrientationControls.js"></script>
 <script src="../libs/requestAnimationFrame/RequestAnimationFrame.js"></script>
 <script type="text/javascript">
 
@@ -106,14 +106,14 @@
     function initVREffect() {
 
 	    // Set up Oculus renderer
-	    effect = new THREE.VREffect(renderer, function(err) {
-	    	if (err) {
-	    		console.log("Error creating VREffect: ", err);			    		
-	    	}
-	    	else {
-	    		console.log("Created VREffect: ", effect);			    		
-	    	}
-	    });
+	    effect = new THREE.StereoEffect(renderer);
+	    effect.setSize(window.innerWidth, window.innerHeight);
+
+	    // StereoEffect's default separation is in cm, we're in M
+	    // Actual cardboard eye separation is 2.5in
+	    // Finally, separation is per-eye so divide by 2
+	    effect.separation = 2.5 * 0.0254 / 2;
+
 
         // Set up fullscreen mode handling
 		var fullScreenButton = document.querySelector( '.button' );
@@ -161,15 +161,7 @@
     function initVRControls() {
 
 		// Set up VR camera controls
-		controls = new THREE.VRControls(camera, function(err) {
-	    	if (err) {
-	    		console.log("Error creating VRControls: ", err);			    		
-	    	}
-	    	else {
-	    		console.log("Created VRControls: ", controls);
-	    		controls.zeroSensor();			    		
-	    	}
-	    });
+		controls = new THREE.DeviceOrientationControls(camera);
     }
 
 </script>
