@@ -131,6 +131,9 @@
 		    scene = new THREE.Scene();
 
 		    // Add  a camera so we can view the scene
+		    // Note that this camera's FOV is ignored in favor of the
+		    // Oculus-supplied FOV for each used inside VREffect.
+		    // See VREffect.js h/t Michael Blix
 	        camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 1, 4000 );
 			scene.add(camera);
 			
@@ -167,7 +170,6 @@
 	    	}
 	    	else {
 	    		console.log("Created VRControls: ", controls);
-	    		controls.zeroSensor();			    		
 	    	}
 	    });
     }
