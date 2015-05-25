@@ -47,53 +47,46 @@
 	cube = null;
 
 
-	$(document).ready(
-			function() {
+	$(document).ready(function() {
+        // Set up Three.js
+        initThreeJS();
 
-				// Set up Three.js
-				initThreeJS();
+        // Set up VR rendering
+        initVREffect();
 
-				// Set up VR rendering
-				initVREffect();
+        // Create the scene content
+        initScene();
 
-				// Create the scene content
-				initScene();
+        // Set up VR camera controls
+        initVRControls();
 
-				// Set up VR camera controls
-				initVRControls();
+        // Set the viewport size and aspect ratio
+        refreshSize();
 
-                // Set the viewport size and aspect ratio
-                refreshSize();
-
-		        // Run the run loop
-		        run();
-			}
-	);
+        // Run the run loop
+        requestAnimationFrame(run);
+    });
 
     var duration = 10000; // ms
-    var currentTime = Date.now();
-	function animate() {
-
-        var now = Date.now();
-        var deltat = now - currentTime;
-        currentTime = now;
+	function animate(deltat) {
         var fract = deltat / duration;
         var angle = Math.PI * 2 * fract;
 		cube.rotation.y += angle;
 	}
 
-	function run() {
-        requestAnimationFrame(function() { run(); });
+    var lastTime = 0;
+	function run(time) {
+        requestAnimationFrame(run);
+        var dt = time - lastTime;
+        lastTime = time;
+        // Render the scene
+        effect.render( scene, camera );
 
-			// Render the scene
-			effect.render( scene, camera );
+        // Update the VR camera controls
+        controls.update();
 
-			// Update the VR camera controls
-			controls.update();
-
-			// Spin the cube for next frame
-			animate();
-
+        // Spin the cube for next frame
+        animate(dt);
     }
 
     function initThreeJS() {
