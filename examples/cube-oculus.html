@@ -12,6 +12,7 @@
 				color: #FFF;
 				background-color: #555;
 				z-index:1;
+                cursor: pointer;
 			}
 
 			#container {
@@ -30,8 +31,6 @@
 	<div class="button">Start VR Mode</div>
     <div id="container"></div>
 
-</body>
-
 <script src="../libs/jquery-1.9.1/jquery-1.9.1.js"></script>
 <script src="../libs/three.js.r68/three.js"></script>
 <script src="../libs/three.js.r68/effects/VREffect.js"></script>
@@ -40,10 +39,10 @@
 <script type="text/javascript">
 
 	var container = null,
-	renderer = null, 
+	renderer = null,
 	effect = null,
 	controls = null,
-	scene = null, 
+	scene = null,
 	camera = null,
 	cube = null;
 
@@ -53,7 +52,7 @@
 
 				// Set up Three.js
 				initThreeJS();
-				
+
 				// Set up VR rendering
 				initVREffect();
 
@@ -63,15 +62,18 @@
 				// Set up VR camera controls
 				initVRControls();
 
+                // Set the viewport size and aspect ratio
+                refreshSize();
+
 		        // Run the run loop
 		        run();
 			}
 	);
-	
+
     var duration = 10000; // ms
     var currentTime = Date.now();
 	function animate() {
-		
+
         var now = Date.now();
         var deltat = now - currentTime;
         currentTime = now;
@@ -82,7 +84,7 @@
 
 	function run() {
         requestAnimationFrame(function() { run(); });
-        
+
 			// Render the scene
 			effect.render( scene, camera );
 
@@ -91,9 +93,9 @@
 
 			// Spin the cube for next frame
 			animate();
-				
+
     }
-    
+
     function initThreeJS() {
 
 		container = document.getElementById("container");
@@ -102,13 +104,38 @@
 	    renderer = new THREE.WebGLRenderer( { antialias: true } );
 
 	    // Set the viewport size
-	    renderer.setSize(window.innerWidth, window.innerHeight);
 	    container.appendChild(renderer.domElement);
 
-		window.addEventListener( 'resize', function(event) { 
-			renderer.setSize(window.innerWidth, window.innerHeight);
-		}, false );
+		window.addEventListener( 'resize', refreshSize, false );
 
+    }
+
+    function refreshSize ( ) {
+        var fullWidth = document.body.clientWidth,
+            fullHeight = document.body.clientHeight,
+            canvasWidth,
+            canvasHeight,
+            aspectWidth;
+        if ( effect && effect.isFullScreen ) {
+            canvasWidth = effect.left.renderRect.width +
+                effect.right.renderRect.width;
+            canvasHeight = Math.max( effect.left.renderRect.height,
+                effect.right.renderRect.height );
+            aspectWidth = canvasWidth / 2;
+        }
+        else{
+            var ratio = window.devicePixelRatio || 1;
+            canvasWidth = fullWidth * ratio;
+            canvasHeight = fullHeight * ratio;
+            aspectWidth = canvasWidth;
+        }
+        renderer.domElement.style.width = fullWidth + "px";
+        renderer.domElement.style.height = fullHeight + "px";
+        renderer.domElement.width = canvasWidth;
+        renderer.domElement.height = canvasHeight;
+        renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+        camera.aspect = aspectWidth / canvasHeight;
+        camera.updateProjectionMatrix( );
     }
 
     function initVREffect() {
@@ -116,10 +143,10 @@
 	    // Set up Oculus renderer
 	    effect = new THREE.VREffect(renderer, function(err) {
 	    	if (err) {
-	    		console.log("Error creating VREffect: ", err);			    		
+	    		console.log("Error creating VREffect: ", err);
 	    	}
 	    	else {
-	    		console.log("Created VREffect: ", effect);			    		
+	    		console.log("Created VREffect: ", effect);
 	    	}
 	    });
 
@@ -128,6 +155,17 @@
 		fullScreenButton.onclick = function() {
 			effect.setFullScreen(true);
 		};
+
+        window.addEventListener("keyup", function(evt){
+            if(!evt.shiftKey &&
+                !evt.altKey &&
+                !evt.ctrlKey &&
+                !evt.metaKey &&
+                evt.keyCode === 27 &&
+                effect.isFullScreen){
+                effect.setFullScreen(false);
+            }
+        });
     }
 
     function initScene() {
@@ -140,12 +178,12 @@
 		    // See VREffect.js h/t Michael Blix
 	        camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 1, 4000 );
 			scene.add(camera);
-			
+
 	        // Create a texture-mapped cube and add it to the scene
 	        // First, create the texture map
 	        var mapUrl = "../images/webvr-logo-512.jpeg";
 	        var map = THREE.ImageUtils.loadTexture(mapUrl);
-	        
+
 	        // Now, create a Basic material; pass in the map
 	        var material = new THREE.MeshBasicMaterial({ map: map });
 
@@ -170,7 +208,7 @@
 		// Set up VR camera controls
 		controls = new THREE.VRControls(camera, function(err) {
 	    	if (err) {
-	    		console.log("Error creating VRControls: ", err);			    		
+	    		console.log("Error creating VRControls: ", err);
 	    	}
 	    	else {
 	    		console.log("Created VRControls: ", controls);
@@ -179,6 +217,8 @@
     }
 
 </script>
+
+</body>
 
 
 </html>

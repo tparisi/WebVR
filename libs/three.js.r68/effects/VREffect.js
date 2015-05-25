@@ -145,25 +145,14 @@ THREE.VREffect = function ( renderer, done ) {
 			return;
 		}
 		// If state doesn't change we do nothing
-		if ( enable === this._fullScreen ) {
+		if ( enable === this.isFullScreen ) {
 			return;
 		}
-		this._fullScreen = !!enable;
+		this.isFullScreen = !!enable;
 
-		// VR Mode disabled
-		if ( !enable ) {
-			// Restores canvas original size
-			renderer.setSize( canvasOriginalSize.width, canvasOriginalSize.height );
-			return;
-		}
-		// VR Mode enabled
-		this._canvasOriginalSize = {
-			width: renderer.domElement.width,
-			height: renderer.domElement.height
-		};
-		// Hardcoded Rift display size
-		renderer.setSize( 1280, 800, false );
-		this.startFullscreen();
+		if ( enable ) {
+          this.startFullscreen();
+        }
 	};
 
 	this.startFullscreen = function() {
