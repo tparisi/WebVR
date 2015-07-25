@@ -32,10 +32,10 @@
 <script type="text/javascript">
 
 	var container = null,
-	renderer = null, 
+	renderer = null,
 	effect = null,
 	controls = null,
-	scene = null, 
+	scene = null,
 	camera = null,
 	cube = null;
 
@@ -45,7 +45,7 @@
 
 				// Set up Three.js
 				initThreeJS();
-				
+
 				// Set up VR rendering
 				initVREffect();
 
@@ -59,11 +59,11 @@
 		        run();
 			}
 	);
-	
+
     var duration = 10000; // ms
     var currentTime = Date.now();
 	function animate() {
-		
+
         var now = Date.now();
         var deltat = now - currentTime;
         currentTime = now;
@@ -74,7 +74,7 @@
 
 	function run() {
         requestAnimationFrame(function() { run(); });
-        
+
 			// Render the scene
 			effect.render( scene, camera );
 
@@ -83,9 +83,9 @@
 
 			// Spin the cube for next frame
 			animate();
-				
+
     }
-    
+
     function initThreeJS() {
 
 		container = document.getElementById("container");
@@ -97,10 +97,36 @@
 	    renderer.setSize(window.innerWidth, window.innerHeight);
 	    container.appendChild(renderer.domElement);
 
-		window.addEventListener( 'resize', function(event) { 
-			renderer.setSize(window.innerWidth, window.innerHeight);
-		}, false );
+		window.addEventListener( 'resize', refreshSize, false );
 
+    }
+
+    function refreshSize ( ) {
+        var fullWidth = document.body.clientWidth,
+            fullHeight = document.body.clientHeight,
+            canvasWidth,
+            canvasHeight,
+            aspectWidth;
+        if ( effect && effect.isFullScreen ) {
+            canvasWidth = effect.left.renderRect.width +
+                effect.right.renderRect.width;
+            canvasHeight = Math.max( effect.left.renderRect.height,
+                effect.right.renderRect.height );
+            aspectWidth = canvasWidth / 2;
+        }
+        else{
+            var ratio = window.devicePixelRatio || 1;
+            canvasWidth = fullWidth * ratio;
+            canvasHeight = fullHeight * ratio;
+            aspectWidth = canvasWidth;
+        }
+        renderer.domElement.style.width = fullWidth + "px";
+        renderer.domElement.style.height = fullHeight + "px";
+        renderer.domElement.width = canvasWidth;
+        renderer.domElement.height = canvasHeight;
+        renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+        camera.aspect = aspectWidth / canvasHeight;
+        camera.updateProjectionMatrix( );
     }
 
     function initVREffect() {
@@ -133,12 +159,12 @@
 		    // Add  a camera so we can view the scene
 	        camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 1, 4000 );
 			scene.add(camera);
-			
+
 	        // Create a texture-mapped cube and add it to the scene
 	        // First, create the texture map
 	        var mapUrl = "../images/webvr-logo-512.jpeg";
 	        var map = THREE.ImageUtils.loadTexture(mapUrl);
-	        
+
 	        // Now, create a Basic material; pass in the map
 	        var material = new THREE.MeshBasicMaterial({ map: map });
 
