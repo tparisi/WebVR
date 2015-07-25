@@ -97,14 +97,14 @@
 	    renderer.setSize(window.innerWidth, window.innerHeight);
 	    container.appendChild(renderer.domElement);
 
-		window.addEventListener( 'resize', function(event) { 
+/*		window.addEventListener( 'resize', function(event) { 
 			renderer.setSize(window.innerWidth, window.innerHeight);
 	        if ( effect ) {
 	        	effect.setSize(window.innerWidth, window.innerHeight);
 	        }
 		}, false );
-
-//		window.addEventListener( 'resize', refreshSize, false );
+*/
+		window.addEventListener( 'resize', refreshSize, false );
 
     }
 
@@ -114,6 +114,7 @@
             canvasWidth,
             canvasHeight,
             aspectWidth;
+
         if ( effect && effect.isFullScreen ) {
             canvasWidth = effect.left.renderRect.width +
                 effect.right.renderRect.width;
@@ -127,10 +128,16 @@
             canvasHeight = fullHeight * ratio;
             aspectWidth = canvasWidth;
         }
+
         renderer.domElement.style.width = fullWidth + "px";
         renderer.domElement.style.height = fullHeight + "px";
         renderer.domElement.width = canvasWidth;
         renderer.domElement.height = canvasHeight;
+
+        if ( effect ) {
+        	effect.setSize(fullWidth, fullHeight);
+        }
+
         renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
         camera.aspect = aspectWidth / canvasHeight;
         camera.updateProjectionMatrix( );
