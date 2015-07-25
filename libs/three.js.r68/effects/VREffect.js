@@ -48,10 +48,24 @@ THREE.VREffect = function ( renderer, done ) {
 				if ( devices[i] instanceof HMDVRDevice ) {
 					vrHMD = devices[i];
 					self._vrHMD = vrHMD;
-					self.leftEyeTranslation = vrHMD.getEyeTranslation( "left" );
-					self.rightEyeTranslation = vrHMD.getEyeTranslation( "right" );
-					self.leftEyeFOV = vrHMD.getRecommendedEyeFieldOfView( "left" );
-					self.rightEyeFOV = vrHMD.getRecommendedEyeFieldOfView( "right" );
+                    if ( vrHMD.getEyeParameters ) {
+                      self.left = vrHMD.getEyeParameters( "left" );
+                      self.right = vrHMD.getEyeParameters( "right" );
+                    }
+                    else {
+                      self.left = {
+                        renderRect: vrHMD.getRecommendedEyeRenderRect( "left" ),
+                        eyeTranslation: vrHMD.getEyeTranslation( "left" ),
+                        recommendedFieldOfView: vrHMD.getRecommendedEyeFieldOfView(
+                            "left" )
+                      };
+                      self.right = {
+                        renderRect: vrHMD.getRecommendedEyeRenderRect( "right" ),
+                        eyeTranslation: vrHMD.getEyeTranslation( "right" ),
+                        recommendedFieldOfView: vrHMD.getRecommendedEyeFieldOfView(
+                            "right" )
+                      };
+                    }
 					break; // We keep the first we encounter
 				}
 			}
@@ -80,8 +94,10 @@ THREE.VREffect = function ( renderer, done ) {
 
 	this.renderStereo = function( scene, camera, renderTarget, forceClear ) {
 
-		var leftEyeTranslation = this.leftEyeTranslation;
-		var rightEyeTranslation = this.rightEyeTranslation;
+		var leftEyeTranslation = this.left.eyeTranslation;
+		var rightEyeTranslation = this.right.eyeTranslation;
+        var leftFOV = this.left.recommendedFieldOfView;
+        var rightFOV = this.right.recommendedFieldOfView;
 		var renderer = this._renderer;
 		var rendererWidth = renderer.domElement.width / renderer.devicePixelRatio;
 		var rendererHeight = renderer.domElement.height / renderer.devicePixelRatio;
@@ -94,8 +110,8 @@ THREE.VREffect = function ( renderer, done ) {
 			camera.updateMatrixWorld();
 		}
 
-		cameraLeft.projectionMatrix = this.FovToProjection( this.leftEyeFOV, true, camera.near, camera.far );
-		cameraRight.projectionMatrix = this.FovToProjection( this.rightEyeFOV, true, camera.near, camera.far );
+		cameraLeft.projectionMatrix = this.FovToProjection( leftFOV, true, camera.near, camera.far );
+		cameraRight.projectionMatrix = this.FovToProjection( rightFOV, true, camera.near, camera.far );
 
 		camera.matrixWorld.decompose( cameraLeft.position, cameraLeft.quaternion, cameraLeft.scale );
 		camera.matrixWorld.decompose( cameraRight.position, cameraRight.quaternion, cameraRight.scale );
@@ -129,25 +145,14 @@ THREE.VREffect = function ( renderer, done ) {
 			return;
 		}
 		// If state doesn't change we do nothing
-		if ( enable === this._fullScreen ) {
+		if ( enable === this.isFullScreen ) {
 			return;
 		}
-		this._fullScreen = !!enable;
+		this.isFullScreen = !!enable;
 
-		// VR Mode disabled
-		if ( !enable ) {
-			// Restores canvas original size
-			renderer.setSize( canvasOriginalSize.width, canvasOriginalSize.height );
-			return;
-		}
-		// VR Mode enabled
-		this._canvasOriginalSize = {
-			width: renderer.domElement.width,
-			height: renderer.domElement.height
-		};
-		// Hardcoded Rift display size
-		renderer.setSize( 1280, 800, false );
-		this.startFullscreen();
+		if ( enable ) {
+          this.startFullscreen();
+        }
 	};
 
 	this.startFullscreen = function() {
