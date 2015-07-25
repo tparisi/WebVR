@@ -99,6 +99,9 @@
 
 		window.addEventListener( 'resize', function(event) { 
 			renderer.setSize(window.innerWidth, window.innerHeight);
+	        if ( effect ) {
+	        	effect.setSize(window.innerWidth, window.innerHeight);
+	        }
 		}, false );
 
 //		window.addEventListener( 'resize', refreshSize, false );
