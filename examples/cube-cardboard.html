@@ -97,7 +97,11 @@
 	    renderer.setSize(window.innerWidth, window.innerHeight);
 	    container.appendChild(renderer.domElement);
 
-		window.addEventListener( 'resize', refreshSize, false );
+		window.addEventListener( 'resize', function(event) { 
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		}, false );
+
+//		window.addEventListener( 'resize', refreshSize, false );
 
     }
 
