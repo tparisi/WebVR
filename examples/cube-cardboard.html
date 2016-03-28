@@ -61,31 +61,27 @@
 	);
 
     var duration = 10000; // ms
-    var currentTime = Date.now();
-	function animate() {
-
-        var now = Date.now();
-        var deltat = now - currentTime;
-        currentTime = now;
+	function animate(deltat) {
         var fract = deltat / duration;
         var angle = Math.PI * 2 * fract;
 		cube.rotation.y += angle;
 	}
 
-	function run() {
-        requestAnimationFrame(function() { run(); });
+    var lastTime = 0;
+	function run(time) {
+        requestAnimationFrame(run);
+        var dt = time - lastTime;
+        lastTime = time;
+        // Render the scene
+        effect.render( scene, camera );
 
-			// Render the scene
-			effect.render( scene, camera );
+        // Update the VR camera controls
+        controls.update();
 
-			// Update the VR camera controls
-			controls.update();
-
-			// Spin the cube for next frame
-			animate();
-
+        // Spin the cube for next frame
+        animate(dt);
     }
-
+    
     function initThreeJS() {
 
 		container = document.getElementById("container");
