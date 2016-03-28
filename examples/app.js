@@ -1,16 +1,15 @@
 
 
-	var container = null,
-    renderer = null,
-    effect = null,
-    controls = null,
-    scene = null,
-    camera = null,
-    cube = null;
+var container = null,
+renderer = null,
+effect = null,
+controls = null,
+scene = null,
+camera = null,
+cube = null;
 
 
-
-$(document).ready(function() {
+function initWebVR() {
     // Set up Three.js
     initThreeJS();
 
@@ -28,28 +27,26 @@ $(document).ready(function() {
 
     // Run the run loop
     requestAnimationFrame(run);
-});
-
-var duration = 10000; // ms
-function animate(deltat) {
-    var fract = deltat / duration;
-    var angle = Math.PI * 2 * fract;
-    cube.rotation.y += angle;
 }
+
+
 
 var lastTime = 0;
 function run(time) {
     requestAnimationFrame(run);
     var dt = time - lastTime;
     lastTime = time;
+
     // Render the scene
     effect.render( scene, camera );
 
     // Update the VR camera controls
     controls.update();
 
-    // Spin the cube for next frame
-    animate(dt);
+    // If there is animation within the scene (besides camera motion), then update that animation
+    if (animateSceneFunction !== undefined) {
+        animateSceneFunction(dt);
+    }
 }
 
 function initThreeJS() {
@@ -106,7 +103,6 @@ function initVREffect() {
             console.log("Created VREffect: ", effect);
         }
     });
-    //effect.setSize(window.innerWidth, window.innerHeight);
 
     // Set up fullscreen mode handling
     var fullScreenButton = document.querySelector( '.button' );
@@ -134,31 +130,8 @@ function initScene() {
     // Note that this camera's FOV is ignored in favor of the
     // Oculus-supplied FOV for each used inside VREffect.
     // See VREffect.js h/t Michael Blix
-    camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.01, 4000 );
+    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 4000);
     scene.add(camera);
-
-    // Create a texture-mapped cube and add it to the scene
-    // First, create the texture map
-    var mapUrl = "../images/webvr-logo-512.jpeg";
-    var map = THREE.ImageUtils.loadTexture(mapUrl);
-
-    // Now, create a Basic material; pass in the map
-    var material = new THREE.MeshBasicMaterial({ map: map });
-
-    // Create the cube geometry
-    var geometry = new THREE.BoxGeometry(.5,.5,.5);
-
-    // And put the geometry and material together into a mesh
-    cube = new THREE.Mesh(geometry, material);
-
-    // Move the mesh back from the camera and tilt it toward the viewer
-    cube.position.z = 0;
-    cube.rotation.x = Math.PI / 5;
-    cube.rotation.y = Math.PI / 5;
-
-    // Finally, add the mesh to our scene
-    scene.add( cube );
-
 }
 
 function initVRControls() {
