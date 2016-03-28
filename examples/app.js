@@ -25,15 +25,20 @@ function initWebVR() {
     // Set the viewport size and aspect ratio
     refreshSize();
 
-    // Run the run loop
-    requestAnimationFrame(run);
+    //Create the 3D objects in your own scene creation file (See scene-cube.js for example)
+    if (createScene) {
+        createScene();
+    };
+
 }
 
-
+function runWebVR(){
+    run( Date.now());
+}
 
 var lastTime = 0;
 function run(time) {
-    requestAnimationFrame(run);
+    requestAnimationFrame(runWebVR);
     var dt = time - lastTime;
     lastTime = time;
 
@@ -44,8 +49,8 @@ function run(time) {
     controls.update();
 
     // If there is animation within the scene (besides camera motion), then update that animation
-    if (animateSceneFunction !== undefined) {
-        animateSceneFunction(dt);
+    if (animateScene !== undefined) {
+       animateScene(dt);
     }
 }
 

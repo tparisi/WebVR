@@ -11,9 +11,9 @@ function createScene() {
 
     // Create a texture-mapped cube and add it to the scene
     // First, create the texture map
-    var textureUrl = "../images/cube-sea.png";//"../images/webvr-logo-512.jpeg";
+    var textureUrl = "../images/webvr-logo-512.jpeg";
     var loader = new THREE.TextureLoader();
-    var map = loader.load( //assign this to the textureHolder
+    var map = loader.load( 
         // resource URL
         textureUrl
     );
