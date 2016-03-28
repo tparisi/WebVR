@@ -52,14 +52,7 @@
         //Main entry point found in app.js
         initWebVR();
 
-        //Create the 3D objects in your own scene creation file (See scene-cube.js for example)
-        if (createScene) {
-            createScene();
-
-            //If your scene has animation (beyond camera motion), then assign it to animateSceneFunction.
-            //   See scene-cube.js for example.
-            animateSceneFunction = animateScene;
-        };
+        runWebVR();
 
     });
 
