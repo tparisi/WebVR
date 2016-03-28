@@ -136,6 +136,7 @@ function initScene() {
     // Oculus-supplied FOV for each used inside VREffect.
     // See VREffect.js h/t Michael Blix
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 4000);
+    camera.position.z = 5; //NOTE: this will be ignored if there is a valid VR device but is needed on desktop view
     scene.add(camera);
 }
 
