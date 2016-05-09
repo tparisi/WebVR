@@ -136,8 +136,8 @@ function refreshSize ( ) {
         renderer.setSize(canvasWidth, canvasHeight);
         camera.aspect = aspectWidth / canvasHeight;
         camera.updateProjectionMatrix( );
-        renderer.domElement.style.height = "250px";
-        renderer.domElement.style.width = "500px";
+        renderer.domElement.style.height = "256px";
+        renderer.domElement.style.width = "512px";
 
     } else {
         renderer.domElement.style.width = fullWidth + "px";
