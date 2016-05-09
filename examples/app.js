@@ -6,8 +6,8 @@ effect = null,
 controls = null,
 scene = null,
 camera = null,
-cube = null;
-
+cube = null,
+vrDisplay;
 
 function initWebVR() {
     // Set up Three.js
@@ -66,6 +66,41 @@ function initThreeJS() {
 
     window.addEventListener( 'resize', refreshSize, false );
 
+    if (navigator.getVRDisplays) {
+        navigator.getVRDisplays().then(function (displays) {
+            if (displays.length > 0) {
+                vrDisplay = displays[0];
+
+               /* initWebGL(true);
+
+                if (vrDisplay.stageParameters) {
+                    // If we have stageParameters use that to resize our scene to
+                    // match the users available space more closely.
+                    cubeIsland.resize(vrDisplay.stageParameters.sizeX, vrDisplay.stageParameters.sizeZ);
+                } else {
+                    VRSamplesUtil.addInfo("VRDisplay did not report stageParameters", 3000);
+                    // Resetting the pose in standing space isn't useful, because the
+                    // headset should always be relative to the physical room.
+                    VRSamplesUtil.addButton("Reset Pose", "R", null, function () { vrDisplay.resetPose(); });
+                }
+
+                if (vrDisplay.capabilities.canPresent)
+                    vrPresentButton = VRSamplesUtil.addButton("Enter VR", "E", "media/icons/cardboard64.png", onVRRequestPresent);
+
+                window.addEventListener('vrdisplaypresentchange', onVRPresentChange, false);*/
+            } else {
+                /*initWebGL(false);
+                VRSamplesUtil.addInfo("WebVR supported, but no VRDisplays found.", 3000);*/
+            }
+        });
+    } else if (navigator.getVRDevices) {
+      //  initWebGL(false);
+         console.log("Your browser supports WebVR but not the latest version. See <a href='http://webvr.info'>webvr.info</a> for more info.");
+    } else {
+       // initWebGL(false);
+        console.log("Your browser does not support WebVR. See <a href='http://webvr.info'>webvr.info</a> for assistance.");
+    }
+
 }
 
 function refreshSize ( ) {
@@ -87,14 +122,34 @@ function refreshSize ( ) {
         canvasHeight = fullHeight * ratio;
         aspectWidth = canvasWidth;
     }
-    renderer.domElement.style.width = fullWidth + "px";
-    renderer.domElement.style.height = fullHeight + "px";
-    renderer.domElement.width = canvasWidth;
-    renderer.domElement.height = canvasHeight;
-    renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
-    renderer.setSize(canvasWidth, canvasHeight);
-    camera.aspect = aspectWidth / canvasHeight;
-    camera.updateProjectionMatrix( );
+
+
+    if (vrDisplay && vrDisplay.isPresenting) {
+        var leftEye = vrDisplay.getEyeParameters("left");
+        var rightEye = vrDisplay.getEyeParameters("right");
+
+        canvasWidth = Math.max(leftEye.renderWidth, rightEye.renderWidth) * 2;
+        canvasHeight = Math.max(leftEye.renderHeight, rightEye.renderHeight);
+        renderer.domElement.width = canvasWidth;
+        renderer.domElement.height = canvasHeight;
+        renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+        renderer.setSize(canvasWidth, canvasHeight);
+        camera.aspect = aspectWidth / canvasHeight;
+        camera.updateProjectionMatrix( );
+        renderer.domElement.style.height = "250px";
+        renderer.domElement.style.width = "500px";
+
+    } else {
+        renderer.domElement.style.width = fullWidth + "px";
+        renderer.domElement.style.height = fullHeight + "px";
+        renderer.domElement.width = canvasWidth;
+        renderer.domElement.height = canvasHeight;
+        renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+        renderer.setSize(canvasWidth, canvasHeight);
+        camera.aspect = aspectWidth / canvasHeight;
+        camera.updateProjectionMatrix( );
+    }
+
 }
 
 function initVREffect() {
@@ -113,6 +168,7 @@ function initVREffect() {
     var fullScreenButton = document.querySelector( '.button' );
     fullScreenButton.onclick = function() {
         effect.setFullScreen(true);
+        refreshSize ( );
     };
 
     window.addEventListener("keyup", function(evt){
