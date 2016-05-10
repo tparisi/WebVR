@@ -11,7 +11,7 @@ function createScene() {
 
     // Create a texture-mapped cube and add it to the scene
     // First, create the texture map
-    var textureUrl = "../images/utrecht-canal1.jpg";
+    var textureUrl = "../images/infinitemirrorspace_spherical.jpg";
     var loader = new THREE.TextureLoader();
     var map = loader.load( 
         // resource URL
