@@ -143,6 +143,8 @@ function initVR() {
 
                 initVREffect();
                 initVRControls();
+                $('.startVRButton').css('display', 'block');
+
             } else {
                 console.log("WebVR supported, but no VRDisplays found.");
             }
@@ -176,7 +178,7 @@ function initVREffect() {
     });
 
     // Set up fullscreen mode handling
-    var fullScreenButton = document.querySelector( '.button' );
+    var fullScreenButton = document.querySelector( '.startVRButton' );
     fullScreenButton.onclick = function() {
         effect.setFullScreen(true);
         refreshSize ( );
