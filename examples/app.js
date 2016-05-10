@@ -13,14 +13,11 @@ function initWebVR() {
     // Set up Three.js
     initThreeJS();
 
-    // Set up VR rendering
-    initVREffect();
-
     // Create the scene content
     initScene();
 
-    // Set up VR camera controls
-    initVRControls();
+    // Set up VR rendering and camera controls (if available)
+    initVR();
 
     // Set the viewport size and aspect ratio
     refreshSize();
@@ -43,7 +40,12 @@ function run(time) {
     lastTime = time;
 
     // Render the scene
-    effect.render( scene, camera );
+    if (effect) {
+        effect.render( scene, camera );
+    }
+    else {
+        renderer.render( scene, camera );
+    }
 
     // Update the VR camera controls
     controls.update();
@@ -65,41 +67,6 @@ function initThreeJS() {
     container.appendChild(renderer.domElement);
 
     window.addEventListener( 'resize', refreshSize, false );
-
-    if (navigator.getVRDisplays) {
-        navigator.getVRDisplays().then(function (displays) {
-            if (displays.length > 0) {
-                vrDisplay = displays[0];
-
-               /* initWebGL(true);
-
-                if (vrDisplay.stageParameters) {
-                    // If we have stageParameters use that to resize our scene to
-                    // match the users available space more closely.
-                    cubeIsland.resize(vrDisplay.stageParameters.sizeX, vrDisplay.stageParameters.sizeZ);
-                } else {
-                    VRSamplesUtil.addInfo("VRDisplay did not report stageParameters", 3000);
-                    // Resetting the pose in standing space isn't useful, because the
-                    // headset should always be relative to the physical room.
-                    VRSamplesUtil.addButton("Reset Pose", "R", null, function () { vrDisplay.resetPose(); });
-                }
-
-                if (vrDisplay.capabilities.canPresent)
-                    vrPresentButton = VRSamplesUtil.addButton("Enter VR", "E", "media/icons/cardboard64.png", onVRRequestPresent);
-
-                window.addEventListener('vrdisplaypresentchange', onVRPresentChange, false);*/
-            } else {
-                /*initWebGL(false);
-                VRSamplesUtil.addInfo("WebVR supported, but no VRDisplays found.", 3000);*/
-            }
-        });
-    } else if (navigator.getVRDevices) {
-      //  initWebGL(false);
-         console.log("Your browser supports WebVR but not the latest version. See <a href='http://webvr.info'>webvr.info</a> for more info.");
-    } else {
-       // initWebGL(false);
-        console.log("Your browser does not support WebVR. See <a href='http://webvr.info'>webvr.info</a> for assistance.");
-    }
 
 }
 
@@ -152,6 +119,50 @@ function refreshSize ( ) {
 
 }
 
+function initScene() {
+    // Create a new Three.js scene
+    scene = new THREE.Scene();
+
+    // Add  a camera so we can view the scene
+    // Note that this camera's FOV is ignored in favor of the
+    // Oculus-supplied FOV for each used inside VREffect.
+    // See VREffect.js h/t Michael Blix
+    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 4000);
+    camera.position.z = 5; //NOTE: this will be ignored if there is a valid VR device but is needed on desktop view
+    scene.add(camera);
+}
+
+function initVR() {
+
+    var gotVR = false;
+
+    if (navigator.getVRDisplays) {
+        navigator.getVRDisplays().then(function (displays) {
+            if (displays.length > 0) {
+                vrDisplay = displays[0];
+
+                initVREffect();
+                initVRControls();
+            } else {
+                console.log("WebVR supported, but no VRDisplays found.");
+            }
+
+        });
+
+        gotVR = true;
+    } else if (navigator.getVRDevices) {
+      //  initWebGL(false);
+         console.log("Your browser supports WebVR but not the latest version. See <a href='http://webvr.info'>webvr.info</a> for more info.");
+    } else {
+       // initWebGL(false);
+        console.log("Your browser does not support WebVR. See <a href='http://webvr.info'>webvr.info</a> for assistance.");
+    }
+
+    if (!gotVR) {
+        initOrbitControls();
+    }
+}
+
 function initVREffect() {
 
     // Set up Oculus renderer
@@ -183,19 +194,6 @@ function initVREffect() {
     });
 }
 
-function initScene() {
-    // Create a new Three.js scene
-    scene = new THREE.Scene();
-
-    // Add  a camera so we can view the scene
-    // Note that this camera's FOV is ignored in favor of the
-    // Oculus-supplied FOV for each used inside VREffect.
-    // See VREffect.js h/t Michael Blix
-    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 4000);
-    camera.position.z = 5; //NOTE: this will be ignored if there is a valid VR device but is needed on desktop view
-    scene.add(camera);
-}
-
 function initVRControls() {
 
     // Set up VR camera controls
@@ -207,4 +205,10 @@ function initVRControls() {
             console.log("Created VRControls: ", controls);
         }
     });
+}
+
+function initOrbitControls() {
+
+    controls = new THREE.OrbitControls(this.camera, renderer.domElement);
+
 }

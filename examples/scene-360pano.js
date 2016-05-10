@@ -11,6 +11,10 @@ function createScene() {
 
     // Create a texture-mapped cube and add it to the scene
     // First, create the texture map
+    // Maya Scene Source – fisheye image https://thefulldomeblog.com/2013/08/06/house-of-mirrors/
+    // rendered with Domemaster3D
+    // https://github.com/zicher3d-org/domemaster-stereo-shader/releases
+
     var textureUrl = "../images/infinitemirrorspace_spherical.jpg";
     var loader = new THREE.TextureLoader();
     var map = loader.load( 
