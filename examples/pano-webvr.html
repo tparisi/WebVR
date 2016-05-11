@@ -1,0 +1,48 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"> <!-- No pinch zoom on mobile -->
+    <meta name="mobile-web-app-capable" content="yes"> <!-- Launch fullscreen when added to home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes"> <!-- Fullscreen Landscape on iOS -->
+
+    <title>WebVR Three.js &mdash; 360 Panorama</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+
+</head>
+<body >
+
+	<div class="startVRButton">Start VR Mode</div>
+    <div id="container"></div>
+
+<script src="../libs/jquery-1.9.1/jquery-1.9.1.js"></script>
+<script src="../libs/three.js.r74/three.js"></script>
+<script src="../libs/three.js.r74/effects/VREffect.js"></script>
+<script src="../libs/three.js.r74/controls/VRControls.js"></script>
+<script src="../libs/three.js.r74/controls/OrbitControls.js"></script>
+    <!-- The WebVRpolyfill is not necessary for VR on a VR-enabled browser, but provides
+         CardboardVR and look-around functionality on desktop.
+         Include it just by uncommenting here if you wish -->
+<!--<script src="../libs/three.js.r74/webvr-polyfill.js"></script>-->
+<script src="../libs/requestAnimationFrame/RequestAnimationFrame.js"></script>
+<script src="app.js"></script>
+<!-- the following file can be swapped out to build your own scene objects -->
+<script src="scene-360pano.js"></script>
+
+<script >
+    var animateSceneFunction;
+
+    $(document).ready(function() {
+
+        //Main entry point found in app.js
+        initWebVR();
+
+        runWebVR();
+
+    });
+
+</script>
+
+</body>
+
+
+</html>
