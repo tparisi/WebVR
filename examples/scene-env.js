@@ -64,11 +64,11 @@ function createScene() {
     scene.add( sphere );
 
     var material = new THREE.MeshBasicMaterial();
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
+    var geometry = new THREE.BoxGeometry(.5, .5, .5);
     // And put the geometry and material together into a mesh
     var box = new THREE.Mesh(geometry, material);
 
-    scene.add( box );
+    //scene.add( box );
 
     var textureUrl = "../images/glowspan.png";
     var loader = new THREE.TextureLoader();
