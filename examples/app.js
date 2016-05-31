@@ -6,21 +6,18 @@ effect = null,
 controls = null,
 scene = null,
 camera = null,
-cube = null;
-
+cube = null,
+vrDisplay;
 
 function initWebVR() {
     // Set up Three.js
     initThreeJS();
 
-    // Set up VR rendering
-    initVREffect();
-
     // Create the scene content
     initScene();
 
-    // Set up VR camera controls
-    initVRControls();
+    // Set up VR rendering and camera controls (if available)
+    initVR();
 
     // Set the viewport size and aspect ratio
     refreshSize();
@@ -43,7 +40,12 @@ function run(time) {
     lastTime = time;
 
     // Render the scene
-    effect.render( scene, camera );
+    if (effect) {
+        effect.render( scene, camera );
+    }
+    else {
+        renderer.render( scene, camera );
+    }
 
     // Update the VR camera controls
     controls.update();
@@ -87,14 +89,80 @@ function refreshSize ( ) {
         canvasHeight = fullHeight * ratio;
         aspectWidth = canvasWidth;
     }
-    renderer.domElement.style.width = fullWidth + "px";
-    renderer.domElement.style.height = fullHeight + "px";
-    renderer.domElement.width = canvasWidth;
-    renderer.domElement.height = canvasHeight;
-    renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
-    renderer.setSize(canvasWidth, canvasHeight);
-    camera.aspect = aspectWidth / canvasHeight;
-    camera.updateProjectionMatrix( );
+
+
+    if (vrDisplay && vrDisplay.isPresenting) {
+        var leftEye = vrDisplay.getEyeParameters("left");
+        var rightEye = vrDisplay.getEyeParameters("right");
+
+        canvasWidth = Math.max(leftEye.renderWidth, rightEye.renderWidth) * 2;
+        canvasHeight = Math.max(leftEye.renderHeight, rightEye.renderHeight);
+        renderer.domElement.width = canvasWidth;
+        renderer.domElement.height = canvasHeight;
+        renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+        renderer.setSize(canvasWidth, canvasHeight);
+        camera.aspect = aspectWidth / canvasHeight;
+        camera.updateProjectionMatrix( );
+        renderer.domElement.style.height = "256px";
+        renderer.domElement.style.width = "512px";
+
+    } else {
+        renderer.domElement.style.width = fullWidth + "px";
+        renderer.domElement.style.height = fullHeight + "px";
+        renderer.domElement.width = canvasWidth;
+        renderer.domElement.height = canvasHeight;
+        renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+        renderer.setSize(canvasWidth, canvasHeight);
+        camera.aspect = aspectWidth / canvasHeight;
+        camera.updateProjectionMatrix( );
+    }
+
+}
+
+function initScene() {
+    // Create a new Three.js scene
+    scene = new THREE.Scene();
+
+    // Add  a camera so we can view the scene
+    // Note that this camera's FOV is ignored in favor of the
+    // Oculus-supplied FOV for each used inside VREffect.
+    // See VREffect.js h/t Michael Blix
+    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 4000);
+    camera.position.z = .001; //NOTE: this will be ignored if there is a valid VR device but is needed on desktop view
+    scene.add(camera);
+}
+
+function initVR() {
+
+    var gotVR = false;
+
+    if (navigator.getVRDisplays) {
+        navigator.getVRDisplays().then(function (displays) {
+            if (displays.length > 0) {
+                vrDisplay = displays[0];
+
+                initVREffect();
+                initVRControls();
+                $('.startVRButton').css('display', 'block');
+
+            } else {
+                console.log("WebVR supported, but no VRDisplays found.");
+            }
+
+        });
+
+        gotVR = true;
+    } else if (navigator.getVRDevices) {
+      //  initWebGL(false);
+         console.log("Your browser supports WebVR but not the latest version. See <a href='http://webvr.info'>webvr.info</a> for more info.");
+    } else {
+       // initWebGL(false);
+        console.log("Your browser does not support WebVR. See <a href='http://webvr.info'>webvr.info</a> for assistance.");
+    }
+
+    if (!gotVR) {
+        initOrbitControls();
+    }
 }
 
 function initVREffect() {
@@ -110,9 +178,10 @@ function initVREffect() {
     });
 
     // Set up fullscreen mode handling
-    var fullScreenButton = document.querySelector( '.button' );
+    var fullScreenButton = document.querySelector( '.startVRButton' );
     fullScreenButton.onclick = function() {
         effect.setFullScreen(true);
+        refreshSize ( );
     };
 
     window.addEventListener("keyup", function(evt){
@@ -127,19 +196,6 @@ function initVREffect() {
     });
 }
 
-function initScene() {
-    // Create a new Three.js scene
-    scene = new THREE.Scene();
-
-    // Add  a camera so we can view the scene
-    // Note that this camera's FOV is ignored in favor of the
-    // Oculus-supplied FOV for each used inside VREffect.
-    // See VREffect.js h/t Michael Blix
-    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 4000);
-    camera.position.z = 5; //NOTE: this will be ignored if there is a valid VR device but is needed on desktop view
-    scene.add(camera);
-}
-
 function initVRControls() {
 
     // Set up VR camera controls
@@ -151,4 +207,10 @@ function initVRControls() {
             console.log("Created VRControls: ", controls);
         }
     });
+}
+
+function initOrbitControls() {
+
+    controls = new THREE.OrbitControls(this.camera, renderer.domElement);
+
 }
