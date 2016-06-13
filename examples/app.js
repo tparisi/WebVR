@@ -35,7 +35,7 @@ function runWebVR(){
 
 var lastTime = 0;
 function run(time) {
-    requestAnimationFrame(runWebVR);
+    vrDisplay.requestAnimationFrame(runWebVR);
     var dt = time - lastTime;
     lastTime = time;
 
