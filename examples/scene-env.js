@@ -99,6 +99,10 @@ function createScene() {
 
         scene.add( cylinderMesh );
 
+        var cubeGeo = new THREE.BoxGeometry(.5, .5, .5);
+        var cubeMesh = new THREE.Mesh( cubeGeo, new THREE.MeshBasicMaterial );
+
+        scene.add( cubeMesh );
 
         }
     );
