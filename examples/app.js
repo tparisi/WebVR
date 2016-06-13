@@ -143,6 +143,8 @@ function initVR() {
 
                 initVREffect();
                 initVRControls();
+                refreshSize();
+                runWebVR();
                 $('.startVRButton').css('display', 'block');
 
             } else {
