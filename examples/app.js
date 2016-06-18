@@ -22,11 +22,6 @@ function initWebVR() {
     // Set the viewport size and aspect ratio
     refreshSize();
 
-    //Create the 3D objects in your own scene creation file (See scene-cube.js for example)
-    if (createScene) {
-        createScene();
-    };
-
 }
 
 function runWebVR(){
@@ -35,7 +30,14 @@ function runWebVR(){
 
 var lastTime = 0;
 function run(time) {
-    vrDisplay.requestAnimationFrame(runWebVR);
+
+    if (vrDisplay) {
+        vrDisplay.requestAnimationFrame(runWebVR);
+    }
+    else {
+        requestAnimationFrame(runWebVR);
+    }
+
     var dt = time - lastTime;
     lastTime = time;
 
@@ -128,8 +130,17 @@ function initScene() {
     // Oculus-supplied FOV for each used inside VREffect.
     // See VREffect.js h/t Michael Blix
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 4000);
-    camera.position.z = .001; //NOTE: this will be ignored if there is a valid VR device but is needed on desktop view
     scene.add(camera);
+
+    //NOTE: this will be ignored if there is a valid VR device but is needed on desktop view
+    camera.position.z = .001;
+
+    //Create the 3D objects in your own scene creation file (See scene-cube.js for example)
+    if (createScene) {
+        createScene();
+    };
+
+
 }
 
 function initVR() {
@@ -164,6 +175,8 @@ function initVR() {
 
     if (!gotVR) {
         initOrbitControls();
+        refreshSize();
+        runWebVR();
     }
 }
 

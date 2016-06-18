@@ -38,6 +38,7 @@ function createScene() {
     // Finally, add the mesh to our scene
     scene.add( sphere );
 
+    camera.position.z = .001;
 
 }
 
