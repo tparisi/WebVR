@@ -35,6 +35,9 @@ function createScene() {
     // Finally, add the mesh to our scene
     scene.add( cube );
 
+    //NOTE: this will be ignored if there is a valid VR device but is needed on desktop view
+    camera.position.z = 1;
+
 }
 
 //Called on each render loop
