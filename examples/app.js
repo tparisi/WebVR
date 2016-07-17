@@ -9,7 +9,7 @@ camera = null,
 cube = null,
 vrDisplay;
 
-function initWebVR() {
+function run() {
     // Set up Three.js
     initThreeJS();
 
