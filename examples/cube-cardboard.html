@@ -19,7 +19,7 @@
 </head>
 <body>
 
-	<div class="button">Start VR Mode</div>
+	<div class="button" style="display:none;">Start VR Mode</div>
     <div id="container" style="position:absolute;left:0;top:0;width:100%;height:100%;"></div>
 
 </body>
@@ -41,6 +41,7 @@
 	cube = null;
 
 	var vrMode = false;
+	var debugMode = false;
 
 	$(document).ready(
 			function() {
@@ -183,6 +184,11 @@
 	    container.addEventListener('webkitfullscreenchange', onFullscreenChange, false);
 	    container.addEventListener('mozfullscreenchange', onFullscreenChange, false);
 
+	    // Only show start VR if we're on mobile
+    	if (isMobile() || debugMode) {
+			fullScreenButton.style.display = "block";
+    	} 
+
     }
 
 	function onFullscreenChange() {
@@ -228,11 +234,25 @@
 
     }
 
+    // Thanks - from Boris Smus' WebVR polyfill
+    function isMobile() {
+		return /Android/i.test(navigator.userAgent) ||
+		      /iPhone|iPad|iPod/i.test(navigator.userAgent);
+	}
+
     function initVRControls() {
 
-		// Set up VR camera controls
-		controls = new THREE.OrbitControls(camera);
-						// THREE.DeviceOrientationControls(camera);
+		var fullScreenButton = document.querySelector( '.button' );
+    	if (isMobile()) {
+			// Set up device orientation camera controls
+			controls = new THREE.DeviceOrientationControls(camera);
+    	} 
+    	else
+    	{
+    		// Set up regular orbit controls
+			controls = new THREE.OrbitControls(camera);
+			camera.position.z += 0.01;
+    	}
     }
 
 </script>
