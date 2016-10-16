@@ -25,9 +25,10 @@
 </body>
 
 <script src="../libs/jquery-1.9.1/jquery-1.9.1.js"></script>
-<script src="../libs/three.js.r68/three.js"></script>
-<script src="../libs/three.js.r68/effects/StereoEffect.js"></script>
-<script src="../libs/three.js.r68/controls/DeviceOrientationControls.js"></script>
+<script src="../libs/three.js.r74/three.js"></script>
+<script src="../libs/three.js.r74/effects/StereoEffect.js"></script>
+<script src="../libs/three.js.r74/controls/DeviceOrientationControls.js"></script>
+<script src="../libs/three.js.r74/controls/OrbitControls.js"></script>
 <script src="../libs/requestAnimationFrame/RequestAnimationFrame.js"></script>
 <script type="text/javascript">
 
@@ -39,6 +40,7 @@
 	camera = null,
 	cube = null;
 
+	var vrMode = false;
 
 	$(document).ready(
 			function() {
@@ -46,14 +48,11 @@
 				// Set up Three.js
 				initThreeJS();
 
-				// Set up VR rendering
-				initVREffect();
-
 				// Create the scene content
 				initScene();
 
-				// Set up VR camera controls
-				initVRControls();
+				// Initialize VR support
+				initVR();
 
 		        // Run the run loop
 		        run();
@@ -68,12 +67,18 @@
 	}
 
     var lastTime = 0;
-	function run(time) {
-        requestAnimationFrame(run);
+	function runLoop(time) {
+        requestAnimationFrame(runLoop);
         var dt = time - lastTime;
         lastTime = time;
+
         // Render the scene
-        effect.render( scene, camera );
+        if (vrMode) {
+	        effect.render(scene, camera);
+        }
+        else {
+        	renderer.render (scene, camera);
+        }
 
         // Update the VR camera controls
         controls.update();
@@ -82,6 +87,10 @@
         animate(dt);
     }
     
+    function run() {
+    	runLoop(Date.now());
+    }
+
     function initThreeJS() {
 
 		container = document.getElementById("container");
@@ -93,15 +102,7 @@
 	    renderer.setSize(window.innerWidth, window.innerHeight);
 	    container.appendChild(renderer.domElement);
 
-/*		window.addEventListener( 'resize', function(event) { 
-			renderer.setSize(window.innerWidth, window.innerHeight);
-	        if ( effect ) {
-	        	effect.setSize(window.innerWidth, window.innerHeight);
-	        }
-		}, false );
-*/
 		window.addEventListener( 'resize', refreshSize, false );
-
     }
 
     function refreshSize ( ) {
@@ -139,6 +140,18 @@
         camera.updateProjectionMatrix( );
     }
 
+    function initVR() {
+
+		// Set up VR rendering
+		initVREffect();
+
+		// Set up fullscreen controls
+		initFullScreenHandling();
+
+		// Set up VR camera controls
+		initVRControls();
+    }
+
     function initVREffect() {
 
 	    // Set up Cardboard renderer
@@ -150,6 +163,9 @@
 	    // Finally, separation is per-eye so divide by 2
 	    effect.separation = 2.5 * 0.0254 / 2;
 
+    }
+
+    function initFullScreenHandling() {
 
         // Set up fullscreen mode handling
 		var fullScreenButton = document.querySelector( '.button' );
@@ -159,8 +175,26 @@
 			} else {
 				container.webkitRequestFullscreen();
 			}
+
+			vrMode = true;
 		};
+
+
+	    container.addEventListener('webkitfullscreenchange', onFullscreenChange, false);
+	    container.addEventListener('mozfullscreenchange', onFullscreenChange, false);
+
     }
+
+	function onFullscreenChange() {
+	    
+	    // Polyfill Mozilla/Webkit
+	    var fullScreenElement = 
+	    	document.webkitFullscreenElement ||
+	    	document.mozFullScreenElement;
+
+        vrMode = (fullScreenElement === container);
+    }
+
 
     function initScene() {
 		    // Create a new Three.js scene
@@ -173,7 +207,7 @@
 	        // Create a texture-mapped cube and add it to the scene
 	        // First, create the texture map
 	        var mapUrl = "../images/webvr-logo-512.jpeg";
-	        var map = THREE.ImageUtils.loadTexture(mapUrl);
+	        var map = new THREE.TextureLoader().load(mapUrl);
 
 	        // Now, create a Basic material; pass in the map
 	        var material = new THREE.MeshBasicMaterial({ map: map });
@@ -197,7 +231,8 @@
     function initVRControls() {
 
 		// Set up VR camera controls
-		controls = new THREE.DeviceOrientationControls(camera);
+		controls = new THREE.OrbitControls(camera);
+						// THREE.DeviceOrientationControls(camera);
     }
 
 </script>
